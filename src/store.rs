@@ -39,7 +39,10 @@ impl Store {
             serde_json::from_reader(BufReader::new(opt))?
         };
 
-        Ok(Self { path: path.to_owned(), info })
+        Ok(Self {
+            path: path.to_owned(),
+            info,
+        })
     }
 
     fn rows_path(&self, date: &NaiveDate) -> PathBuf {
@@ -53,7 +56,11 @@ impl Store {
     }
 
     pub fn put_dataset(&mut self, dataset: &DataSet) -> Result<(), Error> {
-        let file = OpenOptions::new().write(true).create(true).truncate(true).open(self.rows_path(&dataset.date))?;
+        let file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(self.rows_path(&dataset.date))?;
 
         serde_json::to_writer_pretty(BufWriter::new(file), dataset)?;
         self.info.urls_synced.insert(dataset.source_url.clone());
@@ -69,7 +76,11 @@ impl Store {
 
     pub fn save_info(&self) -> Result<(), Error> {
         let info_path = self.path.join("info.json");
-        let file = OpenOptions::new().write(true).create(true).truncate(true).open(info_path)?;
+        let file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(info_path)?;
         serde_json::to_writer_pretty(BufWriter::new(file), &self.info)?;
         Ok(())
     }

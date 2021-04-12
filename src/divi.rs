@@ -179,7 +179,10 @@ fn parse_decimal_to_int(s: &str) -> Result<usize, Error> {
     Ok(parts
         .next()
         .ok_or_else(|| {
-            tracing::error!("Tried to parse integer with decimal point, but failed: {}", s);
+            tracing::error!(
+                "Tried to parse integer with decimal point, but failed: {}",
+                s
+            );
             Error::InvalidRow
         })?
         .parse()?)
@@ -188,7 +191,9 @@ fn parse_decimal_to_int(s: &str) -> Result<usize, Error> {
 impl Row {
     fn from_raw(raw: RawRow, timestamp_hint: &Option<NaiveDateTime>) -> Result<Self, Error> {
         let timestamp = match (&raw.daten_stand, timestamp_hint) {
-            (Some(daten_stand), _) => NaiveDateTime::parse_from_str(daten_stand, "%Y-%m-%d %H:%M:%S")?,
+            (Some(daten_stand), _) => {
+                NaiveDateTime::parse_from_str(daten_stand, "%Y-%m-%d %H:%M:%S")?
+            }
             (None, Some(hint)) => hint.clone(),
             _ => return Err(Error::MissingTimestamp),
         };
@@ -198,7 +203,9 @@ impl Row {
             Error::InvalidRow
         })?;
 
-        let cases_ventilated = raw.faelle_covid_aktuell_invasiv_beatmet.or(raw.faelle_covid_aktuell_beatmet);
+        let cases_ventilated = raw
+            .faelle_covid_aktuell_invasiv_beatmet
+            .or(raw.faelle_covid_aktuell_beatmet);
 
         let state = if let Some(bundesland) = raw.bundesland {
             bundesland
@@ -231,9 +238,17 @@ pub struct DataSet {
 
 impl DataSet {
     pub fn new(source_url: Url, rows: Vec<Row>) -> Result<Self, Error> {
-        let date = rows.get(0).ok_or_else(|| Error::EmptyDataSet)?.timestamp.date();
+        let date = rows
+            .get(0)
+            .ok_or_else(|| Error::EmptyDataSet)?
+            .timestamp
+            .date();
 
-        Ok(Self { date, source_url, rows })
+        Ok(Self {
+            date,
+            source_url,
+            rows,
+        })
     }
 }
 
@@ -282,27 +297,45 @@ fn timestamp_hint_from_url(url: &Url) -> Option<NaiveDateTime> {
         captures.get(2)?.as_str().parse().ok()?,
         captures.get(3)?.as_str().parse().ok()?,
     )
-    .and_hms(captures.get(4)?.as_str().parse().ok()?, captures.get(5)?.as_str().parse().ok()?, 0);
+    .and_hms(
+        captures.get(4)?.as_str().parse().ok()?,
+        captures.get(5)?.as_str().parse().ok()?,
+        0,
+    );
 
     Some(hint)
 }
 
-async fn parse_archive_page(client: &Client, url: Url, base_url: Url) -> Result<(Vec<Url>, Option<Url>), Error> {
+async fn parse_archive_page(
+    client: &Client,
+    url: Url,
+    base_url: Url,
+) -> Result<(Vec<Url>, Option<Url>), Error> {
     let html = client.get(url).send().await?.text().await?;
 
     let soup = Soup::new(&html);
 
-    let table = soup.attr("id", "table-document").find().ok_or_else(|| Error::ParseError("Can't find table"))?;
+    let table = soup
+        .attr("id", "table-document")
+        .find()
+        .ok_or_else(|| Error::ParseError("Can't find table"))?;
 
     let mut urls = vec![];
     for a in table.tag("a").find_all() {
-        let url = base_url.join(&a.get("href").ok_or_else(|| Error::ParseError("Missing href in <a> tag"))?)?;
+        let url = base_url.join(
+            &a.get("href")
+                .ok_or_else(|| Error::ParseError("Missing href in <a> tag"))?,
+        )?;
         tracing::debug!("Found URL: {}", url);
         urls.push(url);
     }
 
     let next_url = if let Some(a_next) = soup.tag("a").attr("title", "Weiter").find() {
-        let next_url = base_url.join(&a_next.get("href").ok_or_else(|| Error::ParseError("Missing href in <a> tag"))?)?;
+        let next_url = base_url.join(
+            &a_next
+                .get("href")
+                .ok_or_else(|| Error::ParseError("Missing href in <a> tag"))?,
+        )?;
         tracing::debug!("Next url: {}", next_url);
         Some(next_url)
     } else {
@@ -361,7 +394,14 @@ impl<'a> Stream for ArchiveStream<'a> {
                         this.inner.urls = urls;
                         this.inner.urls.reverse();
                         if let Some(next_url) = next_url {
-                            *this.request_future = Some(parse_archive_page(&this.inner.client, next_url, this.inner.base_url.clone()).boxed())
+                            *this.request_future = Some(
+                                parse_archive_page(
+                                    &this.inner.client,
+                                    next_url,
+                                    this.inner.base_url.clone(),
+                                )
+                                .boxed(),
+                            )
                         } else {
                             *this.request_future = None;
                         }

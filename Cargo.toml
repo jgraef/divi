@@ -1,10 +1,16 @@
 [package]
-name = "divi"
+name = "divi-tool"
 version = "0.1.0"
-authors = ["Janosch Gräf <janosch@nimiq.com>"]
+authors = ["Janosch Gräf <janosch.graef@gmail.com>"]
 edition = "2018"
+description = "Tool to download and normalize DIVI ITS register."
+license = "MIT"
+#documentation = "https://docs.rs/gv100ad"
+homepage = "https://github.com/jgraef/divi"
+repository = "https://github.com/jgraef/divi"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[badges]
+maintenance = { status = "experimental" }
 
 [dependencies]
 color-eyre = "0.5"
