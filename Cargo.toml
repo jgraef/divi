@@ -1,0 +1,27 @@
+[package]
+name = "divi"
+version = "0.1.0"
+authors = ["Janosch Gräf <janosch@nimiq.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+color-eyre = "0.5"
+dotenv = "0.15"
+tracing = "0.1"
+tracing-subscriber = "0.2"
+tracing-log = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.4", features = ["macros", "rt-multi-thread"] }
+reqwest = { version = "0.11", features = ["json"] }
+chrono = { version = "0.4", features = ["serde"] }
+csv = "1.1"
+soup = "0.5"
+futures = "0.3"
+url = { version = "2.2", features = ["serde"] }
+thiserror = "1.0"
+pin-project = "1.0"
+structopt = "0.3"
+regex = "1.4"
