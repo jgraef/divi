@@ -19,7 +19,7 @@ enum Args {
     ///
     Sync {
         /// Directory in which the normalized DIVI data is stored.
-        #[structopt(default_value = "./data")]
+        #[structopt(short = "d", long = "data", default_value = "./data")]
         data_dir: PathBuf,
 
         /// Don't stop when an already synced file is encountered, but check all files.
