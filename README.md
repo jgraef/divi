@@ -16,7 +16,7 @@ data.
 You don't need to install the program, to use it. `cargo install` will compile and install the binary user-locally.
 
 ```sh
-cargo install
+cargo install --path .
 ```
 
 ## Usage
